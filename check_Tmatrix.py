@@ -21,7 +21,7 @@ def plot_single_matrix(args):
     tmatrix = tmcalc.get_T_matrix(FRETr, framestep=args.fstep)
     
     # Unflatten matrix if necessary
-    if tmcalc.check_input(tmatrix):
+    if tmcalc.check_matrix(tmatrix):
         tmatrix = tmcalc.unflatten_matrix(tmatrix)
 
     # Plot matrix
