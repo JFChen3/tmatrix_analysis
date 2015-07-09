@@ -93,7 +93,7 @@ def plot_compare(bins_1, avg_j_1, bins_2, avg_j_2, labels):
     plt.xlabel("bin i")
     plt.ylabel("Average bin j")
     plt.title("Average transitions from bin i")
-    plt.legend()
+    plt.legend(loc=2)
     plt.savefig("avg_j_bin_compare.png")
     plt.close()
 

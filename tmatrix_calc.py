@@ -71,10 +71,10 @@ def get_T_matrix(FRET_trace, framestep=4, flatten=False):
     if flatten:
         T_matrix_flat = np.ndarray.flatten(T_masked)
         T_matrix_flat = np.transpose(T_matrix_flat)
-        T_matrix = T_matrix_flat
+        T_matrix = T_matrix_flat.filled(0)
     else:
-        T_matrix = T_masked
-        
+        T_matrix = T_masked.filled(0)
+                
     return T_matrix
 
 def check_matrix(matrix):
