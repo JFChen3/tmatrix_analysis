@@ -7,3 +7,4 @@ import find_avg_transition
 import plot_diff_matrix
 import plot_tmatrix
 import tmatrix_calc
+import tmatrix_eig
