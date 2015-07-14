@@ -93,15 +93,15 @@ def trim_matrix(matrix):
     
     if np.size(s_upper) != 0:
         tr = np.min(s_upper)
-        trimmed_matrix = matrix[:tr,:tr]
+        matrix = matrix[:tr,:tr]
         print "Removed %d upper bins"%(num_bins - tr)
     
     if np.size(s_lower) != 0:
         tr = np.max(s_lower) + 1
-        trimmed_matrix = matrix[tr:,tr:]
+        matrix = matrix[tr:,tr:]
         print "Removed %d lower bins"%(tr)
     
-    return trimmed_matrix
+    return matrix
 
 def check_matrix(matrix):
     # Check if matrix needs to be unflattened
