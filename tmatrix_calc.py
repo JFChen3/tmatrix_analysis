@@ -45,37 +45,63 @@ def get_transition_bins(slices, num_bins, framestep=4):
     
     return F_indices, t_indices
     
-def get_T_matrix(FRET_trace, framestep=4, flatten=False):
+def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False):
     # Calculate flattened transition matrix for a given FRET trace
     # Based on fret_analysis/compute_transitions.py
     
     # Get FRET bins
     hist, F_indices, t_indices, num_bins = find_FRET_bins(FRET_trace, framestep)
     
-    T_matrix = np.zeros((num_bins, num_bins))    
+    T_matrix = np.zeros((num_bins, num_bins))
     
     # Add ones to transition bins in square transition matrix
     for i in range(np.shape(F_indices)[0] - framestep):
         T_matrix[F_indices[i], F_indices[i+framestep]] += 1
-    
-    # Mask zeros to avoid divide-by-zero in normalization
-    T_masked = np.ma.masked_where(T_matrix == 0, T_matrix)
-    
-    # Normalize each row
-    for i in range(np.shape(T_matrix)[0]):
-        T_masked[i,:] /= np.sum(T_masked[i,:])
+            
+    if db:
+        # Calculate detailed balance matrix
+        import pyemma
+        T_matrix = trim_matrix(T_matrix)
+        T_matrix = pyemma.msm.estimation.transition_matrix(T_matrix, reversible=True)
+    else:
+        # Mask zeros to avoid divide-by-zero in normalization
+        T_masked = np.ma.masked_where(T_matrix == 0, T_matrix)
 
-    np.savetxt("T_matrix_sim.dat", T_masked)
+        # Normalize each row
+        for i in range(np.shape(T_matrix)[0]):
+            T_masked[i,:] /= np.sum(T_masked[i,:])
+            T_matrix = T_masked.filled(0)
+    
+    np.savetxt("T_matrix_sim.dat", T_matrix)
     
     # Reshape to column vector
     if flatten:
-        T_matrix_flat = np.ndarray.flatten(T_masked)
-        T_matrix_flat = np.transpose(T_matrix_flat)
-        T_matrix = T_matrix_flat.filled(0)
-    else:
-        T_matrix = T_masked.filled(0)
+        T_matrix = np.transpose(np.ndarray.flatten(T_matrix))
                 
     return T_matrix
+
+def trim_matrix(matrix):
+    # Remove states to avoid connectivity issues when calculating detailed balance matrix
+    
+    empty_bins = np.where(~matrix.any(axis=1))[0]
+    print "Found %d empty bins"%np.size(empty_bins)
+    
+    num_states = np.shape(matrix)[0]
+    
+    s_lower = empty_bins[empty_bins < int(num_states/2)]
+    s_upper = empty_bins[empty_bins > int(num_states/2)]
+    
+    if np.size(s_upper) != 0:
+        tr = np.min(s_upper)
+        trimmed_matrix = matrix[:tr,:tr]
+        print "Removed %d upper bins"%(num_bins - tr)
+    
+    if np.size(s_lower) != 0:
+        tr = np.max(s_lower) + 1
+        trimmed_matrix = matrix[tr:,tr:]
+        print "Removed %d lower bins"%(tr)
+    
+    return trimmed_matrix
 
 def check_matrix(matrix):
     # Check if matrix needs to be unflattened

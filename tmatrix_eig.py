@@ -1,3 +1,5 @@
+"""Compute eigenvalues of transition matrices with varying lag times"""
+
 import numpy as np
 #import matplotlib
 #matplotlib.use("Agg")
@@ -26,10 +28,15 @@ def calc_all(args):
     os.chdir(args.savedir)
     
     fstep = args.fstep
+    
+    if args.db:
+        db = True
+    else:
+        db = False
 
     for i in range(len(fstep)):
         
-        T_matrix = tmcalc.get_T_matrix(FRET_trace, framestep=fstep[i], flatten=False)
+        T_matrix = tmcalc.get_T_matrix(FRET_trace, framestep=fstep[i], flatten=False, db=db)
         np.savetxt("T_matrix_fstep_%s.dat"%fstep[i], T_matrix)
         
         lagtime = float(fstep[i])*0.5
@@ -56,6 +63,7 @@ def get_args():
     parser.add_argument("--FRETfile", default="FRET_trace.dat", type=str, help="File containing FRET trace")
     parser.add_argument("--savedir", default="Eigenvalues", type=str, help="Save location")
     parser.add_argument("--fstep", nargs="+", type=int, help="Framesteps, 1 frame=0.5 ps lag time")
+    parser.add_argument("--db", action="store_true", help="Detailed balance matrix")
     
     args = parser.parse_args()
     
