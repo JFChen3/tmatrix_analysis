@@ -1,7 +1,6 @@
 """
 Calculate a transition matrix
 
-Last updated: June 15, 2015
 """
 
 import numpy as np
@@ -15,7 +14,8 @@ def find_FRET_bins(FRETr, fstep):
     
     # Taken from find_sim_bins, included for consistency
     maxvalue = int(np.amax(FRETr)/spacing) + 1
-    minvalue = int(np.amin(FRETr)/spacing)
+    minvalue = 0
+#    minvalue = int(np.amin(FRETr)/spacing)
     num_bins = maxvalue - minvalue
     ran_size = (minvalue*spacing,maxvalue*spacing)
     
@@ -45,7 +45,7 @@ def get_transition_bins(slices, num_bins, framestep=4):
     
     return F_indices, t_indices
     
-def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False):
+def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False, sliding=True):
     # Calculate flattened transition matrix for a given FRET trace
     # Based on fret_analysis/compute_transitions.py
     
@@ -54,10 +54,16 @@ def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False):
     
     T_matrix = np.zeros((num_bins, num_bins))
     
+    if sliding:
+        ran = range(np.shape(F_indices)[0] - framestep)
+    else:
+        ran = range(0, np.shape(F_indices)[0] - framestep, framestep)
+    
     # Add ones to transition bins in square transition matrix
-    for i in range(np.shape(F_indices)[0] - framestep):
+    for i in ran:
         T_matrix[F_indices[i], F_indices[i+framestep]] += 1
-            
+    
+    np.savetxt("count_matrix_fstep_%d.dat"%framestep, T_matrix)
     if db:
         # Calculate detailed balance matrix
         import pyemma
@@ -77,7 +83,7 @@ def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False):
     # Reshape to column vector
     if flatten:
         T_matrix = np.transpose(np.ndarray.flatten(T_matrix))
-                
+
     return T_matrix
 
 def trim_matrix(matrix):
@@ -94,7 +100,7 @@ def trim_matrix(matrix):
     if np.size(s_upper) != 0:
         tr = np.min(s_upper)
         matrix = matrix[:tr,:tr]
-        print "Removed %d upper bins"%(num_bins - tr)
+        print "Removed %d upper bins"%(num_states - tr)
     
     if np.size(s_lower) != 0:
         tr = np.max(s_lower) + 1

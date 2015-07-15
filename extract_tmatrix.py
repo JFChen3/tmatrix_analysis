@@ -9,7 +9,8 @@ def find_FRET_bins(FRETr):
     
     # Taken from find_sim_bins, included for consistency
     maxvalue = int(np.amax(FRETr)/spacing) + 1
-    minvalue = int(np.amin(FRETr)/spacing)
+    minvalue = 0
+#    minvalue = int(np.amin(FRETr)/spacing)
     num_bins = maxvalue - minvalue
     ran_size = (minvalue*spacing,maxvalue*spacing)
 
@@ -18,7 +19,7 @@ def find_FRET_bins(FRETr):
     return hist, slices, num_bins, ran_size, spacing
 
 def tmatrix_exp_calc(T_matrix, bin_size, ran_size, spacing):
-        
+
     #T_matrix is actually the experimental T_matrix
         
     lower_bin = ran_size[0]/spacing
