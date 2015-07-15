@@ -1,9 +1,9 @@
 """Compute eigenvalues of transition matrices with varying lag times"""
 
 import numpy as np
-#import matplotlib
-#matplotlib.use("Agg")
-#import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 import argparse
 import os
@@ -33,7 +33,7 @@ def calc_all(args):
         db = True
     else:
         db = False
-
+        
     for i in range(len(fstep)):
         
         T_matrix = tmcalc.get_T_matrix(FRET_trace, framestep=fstep[i], flatten=False, db=db)
@@ -44,7 +44,14 @@ def calc_all(args):
         print "Calculating eigenvalues for frame step %d, lag time %1.1f ps"%(fstep[i], lagtime)
         eigs = compute_eigs(T_matrix)
         np.savetxt("Eigenvalues_fstep_%s.dat"%fstep[i], eigs, header="eigenvalues for lag time %1.1f ps"%lagtime)
-    
+        
+        if args.ts:
+            timescale = compute_time_scale(eigs, lagtime)
+            np.savetxt("Calc_time_scales_fstep_%s.dat"%fstep[i], timescale)
+
+    if args.tplot:
+        plot_time_scale(fstep)
+
 def compute_eigs(matrix):
     
     w,v = np.linalg.eig(matrix)
@@ -55,6 +62,65 @@ def compute_eigs(matrix):
 
     return w
 
+def compute_time_scale(eigs, lagtime):
+
+    if np.any(np.iscomplex(eigs)):
+        raise ValueError("Not all eigenvalues are real. Cannot compute time scale.")
+
+    #Extract useable eigenvalues
+    tr = np.min(np.where(eigs < 0))
+    eigs_use = eigs[1:tr]
+    
+    print "The eigenvalues used for time scale calculation are: "
+    print eigs_use
+        
+    # Compute time scale using t = -lagtime/ln(eigenvalue)
+    timescale = -lagtime/np.log(eigs_use)
+    
+    return timescale
+
+def plot_time_scale(fstep):
+
+    plot_arr = np.zeros((1,1))
+    
+    # Construct giant matrix of values to plot
+    for i in range(len(fstep)):
+        tmp = np.loadtxt("Calc_time_scales_fstep_%s.dat"%fstep[i])
+        
+        r_tmp = np.shape(tmp)[0]
+        r_pta = np.shape(plot_arr)[0]
+        
+        # Add filler zeros if arrays have different numbers of rows
+        if r_tmp < r_pta:
+            tmp = np.concatenate((tmp, np.zeros(r_pta - r_tmp)))
+        
+        if r_tmp > r_pta:
+            if np.size(np.shape(plot_arr)) == 1:
+                cols = 1
+            else:
+                cols = np.shape(plot_arr)[1]
+                
+            plot_arr = np.concatenate((plot_arr, np.zeros((r_tmp - r_pta, cols))))
+                
+        tmp = np.reshape(tmp,(np.size(tmp),1))
+        
+        plot_arr = np.concatenate((plot_arr, tmp), axis=1)
+
+    plot_arr = np.ma.masked_where(plot_arr == 0, plot_arr)
+
+    plt.figure()
+    lagtime = 0.5*np.array(fstep, dtype=float)
+    
+    for i in range(np.shape(plot_arr)[0]):
+        plt.plot(np.transpose(lagtime), plot_arr[i,1:], 'o-', alpha=0.75, label="Eigenvalue %d"%(i+2))
+
+    plt.xlabel("Lag Time (ps)")
+    plt.ylabel("Calculated Time Scale (ps)")
+    plt.title("Time Scale vs. Lag Time")
+    plt.legend(loc=2, prop={'size':10})
+    plt.savefig("time_plot.png")
+    plt.close()
+
 def get_args():
 
     parser = argparse.ArgumentParser()
@@ -64,6 +130,8 @@ def get_args():
     parser.add_argument("--savedir", default="Eigenvalues", type=str, help="Save location")
     parser.add_argument("--fstep", nargs="+", type=int, help="Framesteps, 1 frame=0.5 ps lag time")
     parser.add_argument("--db", action="store_true", help="Detailed balance matrix")
+    parser.add_argument("--ts", action="store_true", help="Use if you want to compute time scale")
+    parser.add_argument("--tplot", action="store_true", help="Use if you want to generate lag time vs time scale plot")
     
     args = parser.parse_args()
     
