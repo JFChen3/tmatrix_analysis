@@ -28,12 +28,14 @@ def calc_all(args):
     os.chdir(args.savedir)
     
     fstep = args.fstep
+    fstep = range(fstep[0], fstep[1]+fstep[2], fstep[2])
     
     if args.db:
         db = True
     else:
         db = False
-        
+    
+    
     for i in range(len(fstep)):
         
         T_matrix = tmcalc.get_T_matrix(FRET_trace, framestep=fstep[i], flatten=False, db=db)
@@ -87,6 +89,9 @@ def plot_time_scale(fstep):
     for i in range(len(fstep)):
         tmp = np.loadtxt("Calc_time_scales_fstep_%s.dat"%fstep[i])
         
+        if np.size(tmp) == 1:
+            tmp = np.reshape(tmp,(np.size(tmp),))
+        
         r_tmp = np.shape(tmp)[0]
         r_pta = np.shape(plot_arr)[0]
         
@@ -128,7 +133,7 @@ def get_args():
     parser.add_argument("--FRETdir", type=str, help="Location of FRET trace")
     parser.add_argument("--FRETfile", default="FRET_trace.dat", type=str, help="File containing FRET trace")
     parser.add_argument("--savedir", default="Eigenvalues", type=str, help="Save location")
-    parser.add_argument("--fstep", nargs="+", type=int, help="Framesteps, 1 frame=0.5 ps lag time")
+    parser.add_argument("--fstep", nargs=3, type=int, help="Framestep range, format min, max, step. 1 frame=0.5 ps lag time")
     parser.add_argument("--db", action="store_true", help="Detailed balance matrix")
     parser.add_argument("--ts", action="store_true", help="Use if you want to compute time scale")
     parser.add_argument("--tplot", action="store_true", help="Use if you want to generate lag time vs time scale plot")

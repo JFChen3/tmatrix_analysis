@@ -14,7 +14,7 @@ def plot_single(args):
 
     matrix_file = args.tmatrix
 
-    T_matrix = np.loadtxt("matrix_file")
+    T_matrix = np.loadtxt(matrix_file)
 
     if check_matrix(T_matrix):
         T_matrix = unflatten_matrix(T_matrix)
