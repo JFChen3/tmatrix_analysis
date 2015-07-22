@@ -51,8 +51,9 @@ def plot_double(args):
     # Subtract matrices to determine difference matrix
     diff_matrix = sim_matrix - exp_matrix
     
-    ##PRINT AVERAGE DIFFERENCE OF NON-ZERO ENTRIES
-    print np.mean(diff_matrix)
+    ##PRINT AVERAGE ABSOLUTE DIFFERENCE
+    print "Average absolute difference is: "
+    print np.mean(np.abs(diff_matrix))
     
     if "color" in args.plot_type:
         plot_matrix(sim_matrix, "Simulated Transition Matrix", 0, 0.5)

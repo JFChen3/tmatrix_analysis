@@ -8,3 +8,4 @@ import plot_diff_matrix
 import plot_tmatrix
 import tmatrix_calc
 import tmatrix_eig
+import tmatrix_compare

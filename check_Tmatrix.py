@@ -61,6 +61,9 @@ def plot_compare(args):
     
     # Difference matrix
     diff_matrix = tmatrix - tmatrix_exp
+    diff_squared = np.mean(np.abs(diff_matrix))
+    print "Average absolute difference is: "
+    print diff_squared
     
     # Generate plots
     if "color" in args.plot_type:
