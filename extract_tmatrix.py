@@ -22,8 +22,8 @@ def tmatrix_exp_calc(T_matrix, bin_size, ran_size, spacing):
 
     #T_matrix is actually the experimental T_matrix
         
-    lower_bin = ran_size[0]/spacing
-    upper_bin = ran_size[1]/spacing
+    lower_bin = int(np.around(ran_size[0]/spacing, 0))
+    upper_bin = int(np.around(ran_size[1]/spacing, 0))
     
     T_matrix_small = T_matrix[lower_bin:upper_bin, lower_bin:upper_bin]
     
