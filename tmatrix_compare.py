@@ -1,4 +1,8 @@
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 import tmatrix_analysis.tmatrix_calc as tmcalc
 
 import os
@@ -17,20 +21,43 @@ def track_over_iterations(iter_min, iter_max):
     for i in range(num_iters):
         os.chdir("%s/iteration_%d"%(cwd, iter_range[i]))
         matrix_1 = np.loadtxt("sim_feature.dat")
-        if tmcalc.check_matrix(matrix_1):
-            matrix_1 = tmcalc.unflatten_matrix(matrix_1)
         matrix_2 = np.loadtxt("target_feature.dat")
-        if tmcalc.check_matrix(matrix_2):
-            matrix_2 = tmcalc.unflatten_matrix(matrix_2)
         diff_matrix = calc_diff_matrix(matrix_1, matrix_2, nonzero=True)
         abs_diff[i] = avg_abs_diff(diff_matrix)
         sq_diff[i] = avg_sq_diff(diff_matrix)
         dot_product[i] = vector_dot_product(matrix_1, matrix_2)
     
+    print "\nSim Feature vs. Target Feature Comparisons, Iterations %d to %d"%(iter_min, iter_max)
+    print "\nAverage absolute difference: "
     print abs_diff
+    print "\nAverage squared difference: "
     print sq_diff
+    print "\nDot product: "
     print dot_product
+    
+    os.chdir(cwd)
+    
+    if not os.path.isdir("%s/sim_exp_compare"%cwd):
+        os.mkdir("%s/sim_exp_compare"%cwd)
 
+    os.chdir("%s/sim_exp_compare"%cwd)
+    
+    # Save data to a file
+    file = "sim_exp_compare_iter_%d_%d.txt"%(iter_min, iter_max)
+    f = open(file,"w")
+    f.write("Sim Feature vs. Target Feature Comparisons, Iterations %d to %d"%(iter_min, iter_max))
+    f.write("\n")
+    f.write("\nAverage absolute difference: \n")
+    f.write(np.array_str(abs_diff))
+    f.write("\nAverage squared difference: \n")
+    f.write(np.array_str(sq_diff))
+    f.write("\nDot product: \n")
+    f.write(np.array_str(dot_product))
+    f.close()
+    
+    plt.figure()
+    plt.plot(range(iter_min, iter_max+1), abs_diff)
+    
 def calc_diff_matrix(matrix_1, matrix_2, nonzero=True):
     
     diff_matrix = matrix_1 - matrix_2

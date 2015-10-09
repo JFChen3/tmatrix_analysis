@@ -53,6 +53,7 @@ def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False, sliding=True)
     hist, F_indices, t_indices, num_bins = find_FRET_bins(FRET_trace, framestep)
     
     T_matrix = np.zeros((num_bins, num_bins))
+#    T_matrix = np.zeros((100, 100))
     
     if sliding:
         ran = range(np.shape(F_indices)[0] - framestep)

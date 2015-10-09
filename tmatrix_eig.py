@@ -69,9 +69,16 @@ def compute_time_scale(eigs, lagtime):
     if np.any(np.iscomplex(eigs)):
         raise ValueError("Not all eigenvalues are real. Cannot compute time scale.")
 
+    #Sort eigenvalues by magnitude
+    idx = np.abs(eigs).argsort()[::-1]   
+    eigs = eigs[idx]
+        
     #Extract useable eigenvalues
-    tr = np.min(np.where(eigs < 0))
-    eigs_use = eigs[1:tr]
+    if np.size(np.where(eigs<0)) == 0:
+        eigs_use = eigs[1:]
+    else:
+        tr = np.min(np.where(eigs < 0))
+        eigs_use = eigs[1:tr]
     
     print "The eigenvalues used for time scale calculation are: "
     print eigs_use
@@ -114,15 +121,17 @@ def plot_time_scale(fstep):
     plot_arr = np.ma.masked_where(plot_arr == 0, plot_arr)
 
     plt.figure()
-    lagtime = 0.5*np.array(fstep, dtype=float)
+#    lagtime = 0.5*np.array(fstep, dtype=float)
+    lagtime = np.array(fstep, dtype=float)
     
     for i in range(np.shape(plot_arr)[0]):
-        plt.plot(np.transpose(lagtime), plot_arr[i,1:], 'o-', alpha=0.75, label="Eigenvalue %d"%(i+2))
+        plt.semilogy(np.transpose(lagtime), plot_arr[i,1:], 'o-', alpha=0.75, label="Eigenvalue %d"%(i+2))
 
-    plt.xlabel("Lag Time (ps)")
-    plt.ylabel("Calculated Time Scale (ps)")
+    plt.axis([0, 1000, 0, 100000])
+    plt.xlabel("Lag Step (frames)")
+    plt.ylabel("Calculated Time Scale (frames)")
     plt.title("Time Scale vs. Lag Time")
-    plt.legend(loc=2, prop={'size':10})
+    #plt.legend(loc=2, prop={'size':10})
     plt.savefig("time_plot.png")
     plt.close()
 

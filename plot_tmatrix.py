@@ -76,8 +76,8 @@ def spy_matrix(matrix, title):
 
     plt.spy(matrix, precision=0.01)
 
-    plt.xlabel("j")
-    plt.ylabel("i")
+    plt.xlabel("State j")
+    plt.ylabel("State i")
     plt.title("%s"%title)
 
     plt.savefig("%s"%title)
@@ -91,13 +91,19 @@ def plot_matrix(matrix, title, zmin, zmax, diff=False):
         plt.pcolormesh(matrix, cmap="RdBu", vmin=zmin, vmax=zmax)
     else:
         plt.pcolormesh(matrix, vmin=zmin, vmax=zmax)
-    plt.colorbar()
-
+    cbar = plt.colorbar()
+    cbar.ax.tick_params(labelsize=24)
+    
     plt.axis([0, np.shape(matrix)[1], 0, np.shape(matrix)[0]])
-    plt.xlabel("j")
-    plt.ylabel("i")
-    plt.title("%s"%title)
+#    plt.axis([0, 80, 0, 80])
+    plt.xlabel("State j", fontsize=28)
+    plt.ylabel("State i", fontsize=28)
+    plt.title("%s"%title, fontsize=28)
+    
+    plt.xticks(fontsize=24)
+    plt.yticks(fontsize=24)
 
+    plt.gcf().subplots_adjust(bottom=0.15)
     plt.savefig("%s"%title)
     plt.close()
 
