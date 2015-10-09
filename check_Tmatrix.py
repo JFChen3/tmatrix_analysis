@@ -18,7 +18,7 @@ def plot_single_matrix(args):
     FRETr = np.loadtxt(FRETfile)
     
     # Calculate transition matrix
-    tmatrix = tmcalc.get_T_matrix(FRETr, framestep=args.fstep)
+    tmatrix = tmcalc.get_T_matrix(FRETr, spacing=args.spacing, framestep=args.fstep)
     
     # Unflatten matrix if necessary
     if tmcalc.check_matrix(tmatrix):
@@ -45,7 +45,7 @@ def plot_compare(args):
     T_matrix = np.loadtxt(TMfile)
     
     # Calculate and unflatten transition matrix
-    tmatrix = tmcalc.get_T_matrix(FRETr, framestep=args.fstep)
+    tmatrix = tmcalc.get_T_matrix(FRETr, spacing=args.spacing, framestep=args.fstep)
     if tmcalc.check_matrix(tmatrix):
         tmatrix = tmcalc.unflatten_matrix(tmatrix)
     
@@ -82,6 +82,7 @@ def get_args():
     parser.add_argument("--subdir", default="Tmatrix_Long", type=str, help="Subdirectory")
     parser.add_argument("--trace", default="FRET_trace.dat", type=str, help="File containing FRET trace")
     parser.add_argument("--TMfile", default="T_matrix_exp.dat", type=str, help="Experimental T matrix")
+    parser.add_argument("--spacing", default=0.1, type=float, help="histogram spacing")
     parser.add_argument("--fstep", default=4, type=int, help="Frames between transitions, corresponds to lag time")
     parser.add_argument("--compare", action="store_true", help="Specify that you want to compare it to the experimental matrix")
     parser.add_argument("--plot_type", default="color", type=str, choices=["spy", "color"], help="Type of plot")

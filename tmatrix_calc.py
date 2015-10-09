@@ -6,11 +6,10 @@ Calculate a transition matrix
 import numpy as np
 import scipy.stats as stats
 
-def find_FRET_bins(FRETr, fstep):
+def find_FRET_bins(FRETr, fstep, spacing):
     # Histograms the trace data into macrostate bins
     
     weights = np.ones(np.shape(FRETr)[0])
-    spacing = 0.1
     
     # Taken from find_sim_bins, included for consistency
     maxvalue = int(np.amax(FRETr)/spacing) + 1
@@ -45,12 +44,12 @@ def get_transition_bins(slices, num_bins, framestep=4):
     
     return F_indices, t_indices
     
-def get_T_matrix(FRET_trace, framestep=4, flatten=False, db=False, sliding=True):
+def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True):
     # Calculate flattened transition matrix for a given FRET trace
     # Based on fret_analysis/compute_transitions.py
     
     # Get FRET bins
-    hist, F_indices, t_indices, num_bins = find_FRET_bins(FRET_trace, framestep)
+    hist, F_indices, t_indices, num_bins = find_FRET_bins(FRET_trace, framestep, spacing)
     
     T_matrix = np.zeros((num_bins, num_bins))
 #    T_matrix = np.zeros((100, 100))

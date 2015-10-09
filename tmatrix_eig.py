@@ -26,7 +26,7 @@ def calc_all(args):
         os.mkdir(args.savedir)
 
     os.chdir(args.savedir)
-    
+        
     fstep = args.fstep
     fstep = range(fstep[0], fstep[1]+fstep[2], fstep[2])
     
@@ -38,7 +38,7 @@ def calc_all(args):
     
     for i in range(len(fstep)):
         
-        T_matrix = tmcalc.get_T_matrix(FRET_trace, framestep=fstep[i], flatten=False, db=db)
+        T_matrix = tmcalc.get_T_matrix(FRET_trace, spacing=args.spacing, framestep=fstep[i], flatten=False, db=db)
         np.savetxt("T_matrix_fstep_%s.dat"%fstep[i], T_matrix)
         
         lagtime = float(fstep[i])*0.5
@@ -142,6 +142,7 @@ def get_args():
     parser.add_argument("--FRETdir", type=str, help="Location of FRET trace")
     parser.add_argument("--FRETfile", default="FRET_trace.dat", type=str, help="File containing FRET trace")
     parser.add_argument("--savedir", default="Eigenvalues", type=str, help="Save location")
+    parser.add_argument("--spacing", default=0.1, type=float, help="histogram spacing")
     parser.add_argument("--fstep", nargs=3, type=int, help="Framestep range, format min, max, step. 1 frame=0.5 ps lag time")
     parser.add_argument("--db", action="store_true", help="Detailed balance matrix")
     parser.add_argument("--ts", action="store_true", help="Use if you want to compute time scale")

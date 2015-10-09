@@ -1,11 +1,10 @@
 import numpy as np
 import scipy.stats as stats
 
-def find_FRET_bins(FRETr):
+def find_FRET_bins(FRETr, spacing):
     # Histograms the trace data into macrostate bins, analogous to find_sim_bins from compute_Jacobian script
     
     weights = np.ones(np.shape(FRETr)[0])
-    spacing = 0.1
     
     # Taken from find_sim_bins, included for consistency
     maxvalue = int(np.amax(FRETr)/spacing) + 1
