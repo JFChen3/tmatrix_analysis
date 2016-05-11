@@ -62,7 +62,9 @@ def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, 
     # Add ones to transition bins in square transition matrix
     for i in ran:
         T_matrix[F_indices[i], F_indices[i+framestep]] += 1
-    
+   
+    count_matrix = T_matrix
+ 
     np.savetxt("count_matrix_fstep_%d.dat"%framestep, T_matrix)
     if db:
         # Calculate detailed balance matrix
@@ -84,7 +86,7 @@ def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, 
     if flatten:
         T_matrix = np.transpose(np.ndarray.flatten(T_matrix))
 
-    return T_matrix
+    return count_matrix, T_matrix
 
 def trim_matrix(matrix):
     # Remove states to avoid connectivity issues when calculating detailed balance matrix
