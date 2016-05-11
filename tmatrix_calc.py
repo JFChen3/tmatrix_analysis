@@ -69,7 +69,7 @@ def get_T_matrix(count_matrix=None, FRET_trace=None, spacing=0.1, framestep=4, f
     # Calculate flattened transition matrix for a given FRET trace
     # Based on fret_analysis/compute_transitions.py
     
-	if count_matrix == None:
+    if count_matrix == None:
         count_matrix = get_count_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True)
 
     if db:
