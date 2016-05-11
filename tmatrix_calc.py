@@ -43,16 +43,14 @@ def get_transition_bins(slices, num_bins, framestep=4):
     print t_indices
     
     return F_indices, t_indices
-    
-def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True):
-    # Calculate flattened transition matrix for a given FRET trace
-    # Based on fret_analysis/compute_transitions.py
-    
+
+def get_count_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True):
+    # Calculate count matrix for a given trajectory
+
     # Get FRET bins
     hist, F_indices, t_indices, num_bins = find_FRET_bins(FRET_trace, framestep, spacing)
     
-    T_matrix = np.zeros((num_bins, num_bins))
-#    T_matrix = np.zeros((100, 100))
+    count_matrix = np.zeros((num_bins, num_bins))
     
     if sliding:
         ran = range(np.shape(F_indices)[0] - framestep)
@@ -61,22 +59,30 @@ def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, 
     
     # Add ones to transition bins in square transition matrix
     for i in ran:
-        T_matrix[F_indices[i], F_indices[i+framestep]] += 1
+        count_matrix[F_indices[i], F_indices[i+framestep]] += 1
    
-    count_matrix = T_matrix
- 
-    np.savetxt("count_matrix_fstep_%d.dat"%framestep, T_matrix)
+    np.savetxt("count_matrix_fstep_%d.dat"%framestep, count_matrix)
+
+    return count_matrix
+    
+def get_T_matrix(count_matrix=None, FRET_trace=None, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True):
+    # Calculate flattened transition matrix for a given FRET trace
+    # Based on fret_analysis/compute_transitions.py
+    
+	if count_matrix == None:
+        count_matrix = get_count_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, sliding=True)
+
     if db:
         # Calculate detailed balance matrix
         import pyemma
-        T_matrix = trim_matrix(T_matrix)
-        T_matrix = pyemma.msm.estimation.transition_matrix(T_matrix, reversible=True)
+        count_matrix = trim_matrix(count_matrix)
+        T_matrix = pyemma.msm.estimation.transition_matrix(count_matrix, reversible=True)
     else:
         # Mask zeros to avoid divide-by-zero in normalization
-        T_masked = np.ma.masked_where(T_matrix == 0, T_matrix)
+        T_masked = np.ma.masked_where(count_matrix == 0, count_matrix)
 
         # Normalize each row
-        for i in range(np.shape(T_matrix)[0]):
+        for i in range(np.shape(count_matrix)[0]):
             T_masked[i,:] /= np.sum(T_masked[i,:])
             T_matrix = T_masked.filled(0)
     
@@ -86,7 +92,7 @@ def get_T_matrix(FRET_trace, spacing=0.1, framestep=4, flatten=False, db=False, 
     if flatten:
         T_matrix = np.transpose(np.ndarray.flatten(T_matrix))
 
-    return count_matrix, T_matrix
+    return T_matrix
 
 def trim_matrix(matrix):
     # Remove states to avoid connectivity issues when calculating detailed balance matrix
